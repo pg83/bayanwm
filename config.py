@@ -8,17 +8,30 @@ from libqtile.backend.wayland import InputConfig
 mod = 'mod4'
 alt = 'mod1'
 
+term = 'foot'
+
 follow_mouse_focus = True
 
-groups = [
-    Group(i) for i in '12345'
+top_bar = bar.Bar([
+    widget.Prompt(),
+    widget.WindowName(foreground="a0a0a0"),
+    widget.Notify(),
+    widget.Clock(),
+], 48)
+
+screens = [
+    Screen(top=top_bar),
+]
+
+groups = [Group('1', spawn=[term, 'telegram-desktop', 'epiphany'])] + [
+    Group(i) for i in '2345'
 ]
 
 def it_keys():
     yield Key([mod], 'e', lazy.shutdown())
     yield Key([mod], 'x', lazy.window.kill())
 
-    yield Key([mod], 'Return', lazy.spawn('foot'))
+    yield Key([mod], 'Return', lazy.spawn(term))
     yield Key([mod], 'd', lazy.spawn('fuzzel'))
 
     yield Key([mod], 'Left', lazy.group.prev_window())
@@ -27,8 +40,14 @@ def it_keys():
     for g in groups:
         yield Key([mod], g.name, lazy.group[g.name].toscreen())
 
+    for i in range(1, 6):
+        yield Key(['mod1', 'control'], f'F{i}', lazy.core.change_vt(i))
 
 keys = list(it_keys())
+
+layouts = [
+    layout.Max(),
+]
 
 widget_defaults = {
     'font': 'sans',
