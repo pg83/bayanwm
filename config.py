@@ -1,4 +1,5 @@
 import functools
+import subprocess
 
 from libqtile import layout, bar, widget, hook
 from libqtile.config import Key, Screen, Group, Drag, Click, EzKey
@@ -6,18 +7,25 @@ from libqtile.command import lazy
 from libqtile.command.base import expose_command
 from libqtile.layout.base import _SimpleLayoutBase
 from libqtile.backend.wayland import InputConfig
+from libqtile.widget.base import ThreadPoolText
+
 
 mod = 'mod4'
 alt = 'mod1'
-
 term = 'foot'
-
 follow_mouse_focus = True
 
+class I3Status(ThreadPoolText):
+    def __init__(self, **args):
+        self.proc = subprocess.Popen(['i3status'], shell=False, stdout=subprocess.PIPE)
+        ThreadPoolText.__init__(self, '', update_interval=0, **args)
+
+    def poll(self):
+        return self.proc.stdout.readline().decode().strip()
+
 top_bar = bar.Bar([
-    widget.WindowName(foreground="a0a0a0"),
-    widget.Notify(),
-    widget.Clock(),
+    widget.WindowName(),
+    I3Status(),
 ], 48)
 
 screens = [
@@ -141,6 +149,7 @@ widget_defaults = {
     'font': 'sans',
     'fontsize': 32,
     'padding': 6,
+    'foreground': 'a0a0a0',
 }
 
 wl_input_rules = {
