@@ -114,7 +114,9 @@ class Bayan(_SimpleLayoutBase):
             dx1 = int(idx * w / len(vp))
             dx2 = int((idx + 1) * w / len(vp))
 
-            client.place(x + dx1 + 2, y + 2, dx2 - dx1 - 4, h - 4, 2, '#0000ff' if client.has_focus else '#000000', margin=2)
+            bw = 4
+
+            client.place(x + dx1, y, dx2 - dx1 - bw * 2, h - bw * 2, bw, '#881111' if client.has_focus else '#220000', margin=0)
             client.unhide()
         else:
             client.hide()
