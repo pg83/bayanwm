@@ -52,6 +52,8 @@ class Bayan(_SimpleLayoutBase):
         self.prev = None
 
     def layout(self, windows, screen_rect):
+        windows = [x for x in windows if x in self.clients]
+
         for i in windows:
             if not i.has_focus:
                 self.configure(i, screen_rect)
@@ -92,9 +94,6 @@ class Bayan(_SimpleLayoutBase):
         return list(self.it_cur())
 
     def configure(self, client, screen_rect):
-        if client not in self.clients:
-            return
-
         if self.prev is None:
             self.off = 1
         else:
