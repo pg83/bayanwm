@@ -49,6 +49,7 @@ keys = list(it_keys())
 class Bayan(_SimpleLayoutBase):
     def __init__(self, **config):
         _SimpleLayoutBase.__init__(self, **config)
+        self.prev = None
 
     def add_client(self, client):
         return super().add_client(client, 1)
@@ -57,17 +58,47 @@ class Bayan(_SimpleLayoutBase):
         idx = self.clients.current_index
 
         yield idx
-        yield idx + 1
+        yield idx + self.off
+
+    def get_client(self, i):
+        n = len(self.clients)
+
+        if i < 0:
+            return self.get_client(i + n)
+
+        return self.clients[i % n]
 
     def it_cur(self):
-        for i in self.it_cur_idx():
+        for i in sorted(frozenset(self.it_cur_idx())):
             try:
-                yield self.clients[i]
+                yield self.get_client(i)
             except IndexError:
-                return
+                pass
+
+    def cur(self):
+        return list(self.it_cur())
 
     def configure(self, client, screen_rect):
-        vp = list(self.it_cur())
+        if client not in self.clients:
+            return
+
+        if self.prev is None:
+            self.off = 1
+        else:
+            d = self.clients.current_index - self.prev
+
+            if d == 1:
+                self.off = -1
+            elif d == -1:
+                self.off = 1
+            elif d > 0:
+                self.off = 1
+            elif d < 0:
+                self.off = -1
+
+        self.prev = self.clients.current_index
+
+        vp = self.cur()
 
         if client in vp:
             x = screen_rect.x
@@ -80,18 +111,10 @@ class Bayan(_SimpleLayoutBase):
             dx1 = int(idx * w / len(vp))
             dx2 = int((idx + 1) * w / len(vp))
 
-            client.place(x + dx1, y, dx2 - dx1, h, 0, '#0000ff' if client.has_focus else '#000000', margin=0)
+            client.place(x + dx1 + 2, y + 2, dx2 - dx1 - 4, h - 4, 2, '#0000ff' if client.has_focus else '#000000', margin=2)
             client.unhide()
         else:
             client.hide()
-
-    @expose_command("previous")
-    def up(self):
-        _SimpleLayoutBase.previous(self)
-
-    @expose_command("next")
-    def down(self):
-        _SimpleLayoutBase.next(self)
 
 layouts = [
     Bayan(),
