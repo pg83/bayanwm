@@ -58,6 +58,7 @@ class Bayan(_SimpleLayoutBase):
 
         for i in windows:
             if i.has_focus:
+                i.bring_to_front()
                 self.configure(i, screen_rect)
 
     def add_client(self, client):
@@ -128,11 +129,8 @@ class Bayan(_SimpleLayoutBase):
             x1 = x + (dw + bw) * idx
             y1 = y
 
-            client.bring_to_front()
             client.place(x1, y1, dw, h - bw * 2, bw, '#881111' if client.has_focus else '#220000', margin=0)
-            client.bring_to_front()
             client.unhide()
-            client.bring_to_front()
         else:
             client.hide()
 
