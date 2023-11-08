@@ -1,8 +1,10 @@
 import functools
 
+from libqtile import layout, bar, widget, hook
 from libqtile.config import Key, Screen, Group, Drag, Click, EzKey
 from libqtile.command import lazy
-from libqtile import layout, bar, widget, hook
+from libqtile.command.base import expose_command
+from libqtile.layout.base import _SimpleLayoutBase
 from libqtile.backend.wayland import InputConfig
 
 mod = 'mod4'
@@ -13,7 +15,6 @@ term = 'foot'
 follow_mouse_focus = True
 
 top_bar = bar.Bar([
-    widget.Prompt(),
     widget.WindowName(foreground="a0a0a0"),
     widget.Notify(),
     widget.Clock(),
@@ -45,13 +46,51 @@ def it_keys():
 
 keys = list(it_keys())
 
+class Bayan(_SimpleLayoutBase):
+    defaults = [
+        ("margin", 0, "Margin of the layout (int or list of ints [N E S W])"),
+        ("border_focus", "#0000ff", "Border colour(s) for the window when focused"),
+        ("border_normal", "#000000", "Border colour(s) for the window when not focused"),
+        ("border_width", 0, "Border width."),
+    ]
+
+    def __init__(self, **config):
+        _SimpleLayoutBase.__init__(self, **config)
+        self.add_defaults(Bayan.defaults)
+
+    def add_client(self, client):
+        return super().add_client(client, 1)
+
+    def configure(self, client, screen_rect):
+        if self.clients and client is self.clients.current_client:
+            client.place(
+                screen_rect.x,
+                screen_rect.y,
+                screen_rect.width - self.border_width * 2,
+                screen_rect.height - self.border_width * 2,
+                self.border_width,
+                self.border_focus if client.has_focus else self.border_normal,
+                margin=self.margin,
+            )
+            client.unhide()
+        else:
+            client.hide()
+
+    @expose_command("previous")
+    def up(self):
+        _SimpleLayoutBase.previous(self)
+
+    @expose_command("next")
+    def down(self):
+        _SimpleLayoutBase.next(self)
+
 layouts = [
-    layout.Max(),
+    Bayan(),
 ]
 
 widget_defaults = {
     'font': 'sans',
-    'fontsize': 24,
+    'fontsize': 32,
     'padding': 6,
 }
 
