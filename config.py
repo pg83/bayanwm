@@ -47,27 +47,40 @@ def it_keys():
 keys = list(it_keys())
 
 class Bayan(_SimpleLayoutBase):
-    defaults = [
-    ]
-
     def __init__(self, **config):
         _SimpleLayoutBase.__init__(self, **config)
-        self.add_defaults(Bayan.defaults)
 
     def add_client(self, client):
         return super().add_client(client, 1)
 
+    def it_cur_idx(self):
+        idx = self.clients.current_index
+
+        yield idx
+        yield idx + 1
+
+    def it_cur(self):
+        for i in self.it_cur_idx():
+            try:
+                yield self.clients[i]
+            except IndexError:
+                return
+
     def configure(self, client, screen_rect):
-        if self.clients and client is self.clients.current_client:
-            client.place(
-                screen_rect.x,
-                screen_rect.y,
-                screen_rect.width,
-                screen_rect.height,
-                0,
-                "#0000ff" if client.has_focus else "#000000",
-                margin=0,
-            )
+        vp = list(self.it_cur())
+
+        if client in vp:
+            x = screen_rect.x
+            y = screen_rect.y
+            w = screen_rect.width
+            h = screen_rect.height
+
+            idx = vp.index(client)
+
+            dx1 = int(idx * w / len(vp))
+            dx2 = int((idx + 1) * w / len(vp))
+
+            client.place(x + dx1, y, dx2 - dx1, h, 0, '#0000ff' if client.has_focus else '#000000', margin=0)
             client.unhide()
         else:
             client.hide()
