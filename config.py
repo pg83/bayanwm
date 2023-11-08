@@ -76,6 +76,9 @@ class Bayan(_SimpleLayoutBase):
                 pass
 
     def cur(self):
+        if len(self.clients) < 3:
+            return [x for x in self.clients]
+
         return list(self.it_cur())
 
     def configure(self, client, screen_rect):
