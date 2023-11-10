@@ -35,7 +35,7 @@ class AsyncRun:
     def cycle(self):
         self.queue.put('start')
 
-        proc = subprocess.Popen(['i3status'], shell=False, stdout=subprocess.PIPE)
+        proc = subprocess.Popen(self.cmd, shell=False, stdout=subprocess.PIPE)
 
         while True:
             line = proc.stdout.readline().decode().strip()
