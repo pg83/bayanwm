@@ -46,11 +46,30 @@ class AsyncRun:
 
         return self.queue
 
+def xml_escape(s):
+    s = s.replace("&", "&amp;")
+    s = s.replace("<", "&lt;")
+    s = s.replace(">", "&gt;")
+    s = s.replace("\"", "&quot;")
+    s = s.replace("'", "&apos;")
+
+    return s
+
+def i3_split(s):
+    for x in s.split('|'):
+        yield x.strip()
+
+def i3_to_pango_1(s):
+    return s
+
+def i3_to_pango(s):
+    return ' <span foreground="#FFFFFF">|</span> '.join(i3_to_pango_1(xml_escape(x)) for x in i3_split(s))
+
 class I3Status(ThreadPoolText):
     def poll(self):
         while True:
             try:
-                return self.queue.get()
+                return i3_to_pango(self.queue.get())
             except AttributeError:
                 self.queue = AsyncRun(['i3status']).start()
 
