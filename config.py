@@ -1,4 +1,5 @@
 import os
+import time
 import signal
 import functools
 import subprocess
@@ -18,16 +19,17 @@ term = 'foot'
 follow_mouse_focus = True
 
 class I3Status(ThreadPoolText):
-    def __init__(self, **args):
-        self.proc = subprocess.Popen(['i3status'], shell=False, stdout=subprocess.PIPE)
-        ThreadPoolText.__init__(self, '', update_interval=0, **args)
-
     def poll(self):
-        return self.proc.stdout.readline().decode().strip()
+        try:
+            return self.proc.stdout.readline().decode().strip()
+        except Exception as e:
+            time.sleep(1)
+            self.proc = subprocess.Popen(['i3status'], shell=False, stdout=subprocess.PIPE)
+            return 'restart'
 
 top_bar = bar.Bar([
     widget.WindowName(),
-    I3Status(),
+    I3Status(text='', update_interval=0),
 ], 48)
 
 screens = [
