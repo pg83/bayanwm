@@ -1,6 +1,8 @@
 import os
 import time
+import queue
 import signal
+import threading
 import functools
 import subprocess
 
@@ -17,14 +19,40 @@ alt = 'mod1'
 term = 'foot'
 follow_mouse_focus = True
 
+class AsyncRun:
+    def __init__(self, cmd):
+        self.cmd = cmd
+        self.queue = queue.Queue(maxsize=1)
+
+    def run(self):
+        while True:
+            try:
+                self.cycle()
+            except Exception as e:
+                self.queue.put(str(e))
+                time.sleep(1)
+
+    def cycle(self):
+        self.queue.put('start')
+
+        proc = subprocess.Popen(['i3status'], shell=False, stdout=subprocess.PIPE)
+
+        while True:
+            line = proc.stdout.readline().decode().strip()
+            self.queue.put(line)
+
+    def start(self):
+        threading.Thread(target=self.run, daemon=True).start()
+
+        return self.queue
+
 class I3Status(ThreadPoolText):
     def poll(self):
-        try:
-            return self.proc.stdout.readline().decode().strip()
-        except Exception as e:
-            time.sleep(1)
-            self.proc = subprocess.Popen(['i3status'], shell=False, stdout=subprocess.PIPE)
-            return 'restart'
+        while True:
+            try:
+                return self.queue.get()
+            except AttributeError:
+                self.queue = AsyncRun(['i3status']).start()
 
 top_bar = bar.Bar([
     widget.WindowName(),
