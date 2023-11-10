@@ -59,7 +59,16 @@ def i3_split(s):
     for x in s.split('|'):
         yield x.strip()
 
+def col(s, color):
+    return f'<span foreground="{color}">{s}</span>'
+
 def i3_to_pango_1(s):
+    if 'W:' in s:
+        if 'down' in s:
+            return col(s, 'red')
+
+        return col(s, 'green')
+
     return s
 
 def i3_to_pango(s):
