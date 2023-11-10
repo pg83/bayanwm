@@ -20,8 +20,7 @@ alt = 'mod1'
 term = 'foot'
 follow_mouse_focus = True
 
-#where = os.path.dirname(os.path.abspath(__file__))
-where = '/home/pg/bayanwm'
+where = os.path.dirname(os.path.realpath(os.path.abspath(__file__)))
 
 class AsyncRun:
     def __init__(self, cmd):
