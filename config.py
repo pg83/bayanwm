@@ -12,7 +12,6 @@ from libqtile.layout.base import _SimpleLayoutBase
 from libqtile.backend.wayland import InputConfig
 from libqtile.widget.base import ThreadPoolText
 
-
 mod = 'mod4'
 alt = 'mod1'
 term = 'foot'
