@@ -1,3 +1,5 @@
+import os
+import signal
 import functools
 import subprocess
 
@@ -160,3 +162,7 @@ wl_input_rules = {
         kb_options='grp:caps_toggle,grp:switch,ctrl:menu_rctrl',
     ),
 }
+
+@hook.subscribe.shutdown
+def fast_exit():
+    os.kill(0, signal.SIGKILL)
