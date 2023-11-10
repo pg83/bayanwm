@@ -70,7 +70,7 @@ def to_pango_f(f):
     return t
 
 def to_pango(s):
-    return ' <span foreground="#FFFFFF">|</span> '.join(to_pango_f(f) for f in json.loads(s))
+    return col(' | ', '#FFFFFF').join(to_pango_f(f) for f in json.loads(s))
 
 class I3Status(ThreadPoolText):
     def poll_1(self):
