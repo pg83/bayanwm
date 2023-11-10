@@ -87,6 +87,9 @@ class I3Status(ThreadPoolText):
             if l.startswith('[{'):
                 return to_pango(l)
 
+            if l.startswith(',[{'):
+                return to_pango(l[1:])
+
             if 'command error' in l:
                 return col(xml_escape(l), 'red')
 
