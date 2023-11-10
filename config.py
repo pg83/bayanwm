@@ -20,7 +20,8 @@ alt = 'mod1'
 term = 'foot'
 follow_mouse_focus = True
 
-where = os.path.dirname(os.path.abspath(__file__))
+#where = os.path.dirname(os.path.abspath(__file__))
+where = '/home/pg/bayanwm'
 
 class AsyncRun:
     def __init__(self, cmd):
@@ -32,7 +33,7 @@ class AsyncRun:
             try:
                 self.cycle()
             except Exception as e:
-                self.queue.put(str(e))
+                self.queue.put(f'command error: {e}')
                 time.sleep(1)
 
     def cycle(self):
@@ -70,7 +71,7 @@ def to_pango_f(f):
     return t
 
 def to_pango(s):
-    return col(' | ', '#FFFFFF').join(to_pango_f(f) for f in json.loads(s))
+    return col(' | ', 'white').join(to_pango_f(f) for f in json.loads(s))
 
 class I3Status(ThreadPoolText):
     def poll_1(self):
@@ -78,22 +79,23 @@ class I3Status(ThreadPoolText):
             try:
                 return self.queue.get()
             except AttributeError:
-                self.queue = AsyncRun(['i3status', os.path.join(where, 'i3.config')]).start()
+                self.queue = AsyncRun(['i3status', '-c', os.path.join(where, 'i3.config')]).start()
 
     def poll_2(self):
         while True:
             l = self.poll_1()
 
             if l.startswith('[{'):
-                return l
+                return to_pango(l)
+
+            if 'command error' in l:
+                return col(xml_escape(l), 'red')
 
     def poll(self):
-        l = self.poll_2()
-
         try:
-            return to_pango(l)
-        except Exception:
-            return l
+            return self.poll_2()
+        except Exception as e:
+            return xml_escape(str(e))
 
 top_bar = bar.Bar([
     widget.WindowName(),
