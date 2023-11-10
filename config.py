@@ -1,4 +1,5 @@
 import os
+import json
 import time
 import queue
 import signal
@@ -18,6 +19,8 @@ mod = 'mod4'
 alt = 'mod1'
 term = 'foot'
 follow_mouse_focus = True
+
+where = os.path.dirname(os.path.abspath(__file__))
 
 class AsyncRun:
     def __init__(self, cmd):
@@ -55,32 +58,42 @@ def xml_escape(s):
 
     return s
 
-def i3_split(s):
-    for x in s.split('|'):
-        yield x.strip()
-
 def col(s, color):
     return f'<span foreground="{color}">{s}</span>'
 
-def i3_to_pango_1(s):
-    if 'W:' in s:
-        if 'down' in s:
-            return col(s, 'red')
+def to_pango_f(f):
+    t = xml_escape(f['full_text'])
 
-        return col(s, 'green')
+    if 'color' in f:
+        t = col(t, f['color'])
 
-    return s
+    return t
 
-def i3_to_pango(s):
-    return ' <span foreground="#FFFFFF">|</span> '.join(i3_to_pango_1(xml_escape(x)) for x in i3_split(s))
+def to_pango(s):
+    return ' <span foreground="#FFFFFF">|</span> '.join(to_pango_f(f) for f in json.loads(s))
 
 class I3Status(ThreadPoolText):
-    def poll(self):
+    def poll_1(self):
         while True:
             try:
-                return i3_to_pango(self.queue.get())
+                return self.queue.get()
             except AttributeError:
-                self.queue = AsyncRun(['i3status']).start()
+                self.queue = AsyncRun(['i3status', os.path.join(where, 'i3.config')]).start()
+
+    def poll_2(self):
+        while True:
+            l = self.poll_1()
+
+            if l.startswith('[{'):
+                return l
+
+    def poll(self):
+        l = self.poll_2()
+
+        try:
+            return to_pango(l)
+        except Exception:
+            return l
 
 top_bar = bar.Bar([
     widget.WindowName(),
