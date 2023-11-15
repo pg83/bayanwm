@@ -7,6 +7,8 @@ import threading
 import functools
 import subprocess
 
+import palettable
+
 from libqtile import layout, bar, widget, hook
 from libqtile.config import Key, Screen, Group, Drag, Click, EzKey
 from libqtile.command import lazy
@@ -14,6 +16,8 @@ from libqtile.command.base import expose_command
 from libqtile.layout.base import _SimpleLayoutBase
 from libqtile.backend.wayland import InputConfig
 from libqtile.widget.base import ThreadPoolText
+
+colors = palettable.cartocolors.diverging.Earth_4.hex_colors
 
 mod = 'mod4'
 alt = 'mod1'
@@ -61,11 +65,21 @@ def xml_escape(s):
 def col(s, color):
     return f'<span foreground="{color}">{s}</span>'
 
+def get_color_for(name):
+    return {
+        'battery': colors[0],
+        'disk_info': colors[1],
+        'memory': colors[2],
+        'tztime': colors[3],
+    }.get(name, None)
+
 def to_pango_f(f):
     t = xml_escape(f['full_text'])
 
     if 'color' in f:
         t = col(t, f['color'])
+    elif color := get_color_for(f['name']):
+        t = col(t, color)
 
     return t
 
