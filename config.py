@@ -75,7 +75,6 @@ def get_color_for(name):
         'disk_info': colors[2],
         'memory': colors[3],
         'tztime': colors[4],
-        '#FF0000': '#FF0000',
         '#00FF00': colors[0],
     }.get(name, None)
 
