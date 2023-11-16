@@ -17,7 +17,8 @@ from libqtile.layout.base import _SimpleLayoutBase
 from libqtile.backend.wayland import InputConfig
 from libqtile.widget.base import ThreadPoolText
 
-colors = palettable.cartocolors.diverging.Earth_4.hex_colors
+colors = palettable.cartocolors.diverging.Earth_5.hex_colors
+colors = palettable.cartocolors.qualitative.Antique_5.hex_colors
 
 mod = 'mod4'
 alt = 'mod1'
@@ -63,25 +64,36 @@ def xml_escape(s):
     return s
 
 def col(s, color):
-    return f'<span foreground="{color}">{s}</span>'
+    if color:
+        return f'<span foreground="{color}">{s}</span>'
+
+    return s
 
 def get_color_for(name):
     return {
-        'battery': colors[0],
-        'disk_info': colors[1],
-        'memory': colors[2],
-        'tztime': colors[3],
+        'battery': colors[1],
+        'disk_info': colors[2],
+        'memory': colors[3],
+        'tztime': colors[4],
+        '#FF0000': '#FF0000',
+        '#00FF00': colors[0],
     }.get(name, None)
+
+def remap_color(c):
+    while n := get_color_for(c):
+        c = n
+
+    return c
 
 def to_pango_f(f):
     t = xml_escape(f['full_text'])
 
     if 'color' in f:
-        t = col(t, f['color'])
+        c = f['color']
     elif color := get_color_for(f['name']):
-        t = col(t, color)
+        c = color
 
-    return t
+    return col(t, remap_color(c))
 
 def to_pango(s):
     return col(' | ', 'white').join(to_pango_f(f) for f in json.loads(s))
