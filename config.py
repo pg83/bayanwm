@@ -22,7 +22,7 @@ colors = palettable.cartocolors.qualitative.Antique_5.hex_colors
 
 mod = 'mod4'
 alt = 'mod1'
-term = 'foot'
+term = 'alacritty'
 follow_mouse_focus = True
 
 where = os.path.dirname(os.path.realpath(os.path.abspath(__file__)))
